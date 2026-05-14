@@ -41,7 +41,7 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue';
-import domtoimage from 'dom-to-image-more';
+import { toPng } from 'html-to-image';
 const preview = ref('');
 const captureArea = ref(null);
 
@@ -111,36 +111,32 @@ const stopDrag = () => {
 };
 const downloadImage = async () => {
   try {
-    if (!captureArea.value) {
-      alert('Không tìm thấy vùng ảnh');
-      return;
-    }
+    if (!captureArea.value) return;
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const dataUrl = await domtoimage.toPng(captureArea.value, {
+    const node = captureArea.value;
+    const width = node.clientWidth;
+    const height = node.clientHeight;
+    const dataUrl = await toPng(node, {
       cacheBust: true,
-      pixelRatio: window.innerWidth < 768 ? 1 : 2,
-      quality: 1,
-      bgcolor: 'transparent',
-      width: captureArea.value.offsetWidth,
-      height: captureArea.value.offsetHeight + 10,
+      pixelRatio: 2,
+      backgroundColor: 'transparent',
+      canvasWidth: width * 2,
+      canvasHeight: height * 2,
+      width,
+      height,
       style: {
-        transform: 'scale(1)',
-        transformOrigin: 'top left',
+        margin: '0',
+        padding: '0',
       },
     });
 
     const link = document.createElement('a');
     link.download = `ky-niem-${Date.now()}.png`;
     link.href = dataUrl;
-
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   } catch (error) {
     console.error(error);
-    alert(error?.message || 'Không thể tải ảnh xuống');
+    alert('Không thể tải ảnh');
   }
 };
 </script>
