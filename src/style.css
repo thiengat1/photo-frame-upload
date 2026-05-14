@@ -64,3 +64,58 @@ button {
 button:hover {
   opacity: 0.9;
 }
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .frame-wrapper {
+    width: 92vw;
+    height: 92vw;
+    max-width: 420px;
+    max-height: 420px;
+  }
+
+  .image-container {
+    width: 68%;
+    height: 68%;
+
+    top: 9%;
+    left: 16%;
+  }
+
+  .tools {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .tools input[type='range'] {
+    width: 220px;
+  }
+
+  input[type='file'] {
+    width: 100%;
+    max-width: 300px;
+    font-size: 14px;
+  }
+
+  .download-btn {
+    width: 100%;
+    max-width: 300px;
+
+    padding: 14px;
+
+    font-size: 16px;
+  }
+
+  .user-image {
+    touch-action: none;
+  }
+}
