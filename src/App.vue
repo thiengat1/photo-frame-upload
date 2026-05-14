@@ -120,10 +120,11 @@ const downloadImage = async () => {
 
     const dataUrl = await domtoimage.toPng(captureArea.value, {
       cacheBust: true,
+      pixelRatio: window.innerWidth < 768 ? 1 : 2,
       quality: 1,
       bgcolor: 'transparent',
-      width: captureArea.value.offsetWidth * 2,
-      height: captureArea.value.offsetHeight * 2,
+      width: captureArea.value.offsetWidth,
+      height: captureArea.value.offsetHeight + 10,
       style: {
         transform: 'scale(1)',
         transformOrigin: 'top left',
