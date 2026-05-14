@@ -7,7 +7,7 @@
     <div class="tools" v-if="preview">
       <label>
         Zoom
-        <input type="range" min="1" max="3" step="0.1" v-model="scale" />
+        <input type="range" min="0.5" max="3" step="0.1" v-model="scale" />
       </label>
     </div>
 
