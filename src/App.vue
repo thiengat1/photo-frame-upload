@@ -11,28 +11,33 @@
       </label>
     </div>
 
-    <div class="frame-wrapper" ref="captureArea">
-      <div
-        class="image-container"
+    <div
+      class="frame-wrapper"
+      @mousedown="startDrag"
+      @mousemove="onDrag"
+      @mouseup="stopDrag"
+      @mouseleave="stopDrag"
+      @touchstart="startDrag"
+      @touchmove="onDrag"
+      @touchend="stopDrag"
+    >
+      <img
         v-if="preview"
-        @mousedown="startDrag"
-        @mousemove="onDrag"
-        @mouseup="stopDrag"
-        @mouseleave="stopDrag"
-        @touchstart="startDrag"
-        @touchmove="onDrag"
-        @touchend="stopDrag"
-      >
-        <img
-          :src="preview"
-          class="user-image"
-          :style="imageStyle"
-          draggable="false"
-        />
-      </div>
+        :src="preview"
+        class="user-image"
+        :style="imageStyle"
+        draggable="false"
+      />
 
       <img src="/frame.png" class="frame-overlay" />
     </div>
+
+    <canvas
+      ref="canvasRef"
+      width="600"
+      height="600"
+      style="display: none"
+    ></canvas>
 
     <button class="download-btn" @click="downloadImage" :disabled="!preview">
       Tải ảnh xuống
@@ -41,9 +46,9 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue';
-import { toPng } from 'html-to-image';
+
 const preview = ref('');
-const captureArea = ref(null);
+const canvasRef = ref(null);
 
 const scale = ref(1);
 const posX = ref(0);
@@ -55,6 +60,7 @@ const startY = ref(0);
 
 const imageStyle = computed(() => ({
   transform: `translate(${posX.value}px, ${posY.value}px) scale(${scale.value})`,
+  transformOrigin: 'top left',
 }));
 const onUpload = (e) => {
   const file = e.target.files[0];
@@ -73,6 +79,7 @@ const onUpload = (e) => {
 
   reader.readAsDataURL(file);
 };
+
 const getPoint = (event) => {
   if (event.touches && event.touches[0]) {
     return {
@@ -86,7 +93,6 @@ const getPoint = (event) => {
     y: event.clientY,
   };
 };
-
 const startDrag = (event) => {
   isDragging.value = true;
 
@@ -95,6 +101,7 @@ const startDrag = (event) => {
   startX.value = point.x - posX.value;
   startY.value = point.y - posY.value;
 };
+
 const onDrag = (event) => {
   if (!isDragging.value) return;
 
@@ -109,31 +116,62 @@ const onDrag = (event) => {
 const stopDrag = () => {
   isDragging.value = false;
 };
+const loadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+
+    img.src = src;
+  });
+};
+
+const drawCanvas = async () => {
+  const canvas = canvasRef.value;
+
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const userImg = await loadImage(preview.value);
+  const frameImg = await loadImage('/frame.png');
+
+  ctx.save();
+
+  ctx.translate(posX.value, posY.value);
+  ctx.scale(scale.value, scale.value);
+
+  ctx.drawImage(userImg, 0, 0, 600, 600);
+
+  ctx.restore();
+
+  ctx.drawImage(frameImg, 0, 0, 600, 600);
+};
 const downloadImage = async () => {
   try {
-    if (!captureArea.value) return;
+    await drawCanvas();
 
-    const node = captureArea.value;
-    const width = node.clientWidth;
-    const height = node.clientHeight;
-    const dataUrl = await toPng(node, {
-      cacheBust: true,
-      pixelRatio: 2,
-      backgroundColor: 'transparent',
-      canvasWidth: width * 2,
-      canvasHeight: height * 2,
-      width,
-      height,
-      style: {
-        margin: '0',
-        padding: '0',
-      },
-    });
+    const canvas = canvasRef.value;
 
-    const link = document.createElement('a');
-    link.download = `ky-niem-${Date.now()}.png`;
-    link.href = dataUrl;
-    link.click();
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = `ky-niem-${Date.now()}.png`;
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   } catch (error) {
     console.error(error);
     alert('Không thể tải ảnh');
