@@ -119,3 +119,6 @@ button:hover {
     touch-action: none;
   }
 }
+.open-browser {
+  margin-top: 4px;
+}

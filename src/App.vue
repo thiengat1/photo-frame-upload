@@ -42,11 +42,18 @@
     <button class="download-btn" @click="downloadImage" :disabled="!preview">
       Tải ảnh xuống
     </button>
+    <a v-if="isZalo" :href="currentUrl" target="_blank" class="open-browser">
+      Mở bằng trình duyệt
+    </a>
   </div>
 </template>
 <script setup>
 import { ref, computed } from 'vue';
 
+const isZalo =
+  typeof navigator !== 'undefined' && /Zalo/i.test(navigator.userAgent);
+
+const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 const preview = ref('');
 const canvasRef = ref(null);
 
@@ -131,24 +138,44 @@ const loadImage = (src) => {
 
 const drawCanvas = async () => {
   const canvas = canvasRef.value;
-
   const ctx = canvas.getContext('2d');
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const size = 600;
+
+  canvas.width = size;
+  canvas.height = size;
+
+  ctx.clearRect(0, 0, size, size);
 
   const userImg = await loadImage(preview.value);
   const frameImg = await loadImage('/frame.png');
 
+  // cover chuẩn
+  const scaleCover = Math.max(size / userImg.width, size / userImg.height);
+
+  const imgWidth = userImg.width * scaleCover;
+  const imgHeight = userImg.height * scaleCover;
+
+  // center chuẩn
+  const x = (size - imgWidth) / 2;
+  const y = (size - imgHeight) / 2;
+
   ctx.save();
 
+  // drag + zoom
   ctx.translate(posX.value, posY.value);
-  ctx.scale(scale.value, scale.value);
 
-  ctx.drawImage(userImg, 0, 0, 600, 600);
+  ctx.translate(size / 2, size / 2);
+  ctx.scale(scale.value, scale.value);
+  ctx.translate(-size / 2, -size / 2);
+
+  // vẽ ảnh full cover
+  ctx.drawImage(userImg, x, y, imgWidth, imgHeight);
 
   ctx.restore();
 
-  ctx.drawImage(frameImg, 0, 0, 600, 600);
+  // frame
+  ctx.drawImage(frameImg, 0, 0, size, size);
 };
 const downloadImage = async () => {
   try {
