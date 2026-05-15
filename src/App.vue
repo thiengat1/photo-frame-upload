@@ -42,9 +42,11 @@
     <button class="download-btn" @click="downloadImage" :disabled="!preview">
       Tải ảnh xuống
     </button>
-    <button v-if="isZalo" class="open-browser" @click="openExternalBrowser">
-      Mở bằng trình duyệt
-    </button>
+    <div v-if="isZalo" class="zalo-guide">
+      <p>Zalo đang chặn tải ảnh.</p>
+
+      <p>Hãy bấm dấu ⋮ góc trên bên phải → Chọn "Mở bằng trình duyệt"</p>
+    </div>
   </div>
 </template>
 <script setup>

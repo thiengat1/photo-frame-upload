@@ -127,3 +127,11 @@ button:hover {
   background: #0068ff;
   color: white;
 }
+.zalo-guide {
+  margin-top: 16px;
+  padding: 14px;
+  background: #fff3cd;
+  border-radius: 10px;
+  color: #856404;
+  font-size: 14px;
+}
