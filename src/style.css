@@ -120,5 +120,10 @@ button:hover {
   }
 }
 .open-browser {
-  margin-top: 4px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #0068ff;
+  color: white;
 }

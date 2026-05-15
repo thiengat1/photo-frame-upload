@@ -53,7 +53,21 @@ import { ref, computed } from 'vue';
 const isZalo =
   typeof navigator !== 'undefined' && /Zalo/i.test(navigator.userAgent);
 
-const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+const openExternalBrowser = () => {
+  const url = window.location.href;
+
+  // Android
+  if (/Android/i.test(navigator.userAgent)) {
+    window.location.href = `intent://${url.replace(
+      /^https?:\/\//,
+      ''
+    )}#Intent;scheme=https;package=com.android.chrome;end`;
+    return;
+  }
+
+  // iPhone
+  window.open(url, '_blank');
+};
 const preview = ref('');
 const canvasRef = ref(null);
 
