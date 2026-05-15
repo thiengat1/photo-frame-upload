@@ -156,22 +156,56 @@ const downloadImage = async () => {
 
     const canvas = canvasRef.value;
 
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
+    const dataUrl = canvas.toDataURL('image/png');
 
-      const link = document.createElement('a');
+    const isZalo = /Zalo/i.test(navigator.userAgent);
 
-      link.href = url;
-      link.download = `ky-niem-${Date.now()}.png`;
+    // Zalo WebView
+    if (isZalo) {
+      const newTab = window.open();
 
-      document.body.appendChild(link);
+      if (newTab) {
+        newTab.document.write(`
+          <html>
+            <head>
+              <title>Tải ảnh</title>
+              <style>
+                body{
+                  margin:0;
+                  display:flex;
+                  justify-content:center;
+                  align-items:center;
+                  background:#000;
+                }
+                img{
+                  max-width:100%;
+                  height:auto;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" />
+            </body>
+          </html>
+        `);
+      } else {
+        alert('Zalo đang chặn tải ảnh. Hãy mở bằng Chrome/Safari');
+      }
 
-      link.click();
+      return;
+    }
 
-      document.body.removeChild(link);
+    // Browser thường
+    const link = document.createElement('a');
 
-      URL.revokeObjectURL(url);
-    }, 'image/png');
+    link.href = dataUrl;
+    link.download = `ky-niem-${Date.now()}.png`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
   } catch (error) {
     console.error(error);
     alert('Không thể tải ảnh');
