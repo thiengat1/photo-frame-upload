@@ -42,9 +42,9 @@
     <button class="download-btn" @click="downloadImage" :disabled="!preview">
       Tải ảnh xuống
     </button>
-    <a v-if="isZalo" :href="currentUrl" target="_blank" class="open-browser">
+    <button v-if="isZalo" class="open-browser" @click="openExternalBrowser">
       Mở bằng trình duyệt
-    </a>
+    </button>
   </div>
 </template>
 <script setup>
